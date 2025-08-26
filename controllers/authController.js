@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const { generateToken, setCookieOptions } = require("../utils/jwt");
+const { generateToken } = require("../utils/jwt");
 
 const register = async (req, res, next) => {
   try {
@@ -27,16 +27,6 @@ const register = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
-    // Clear any existing cookies before setting new one
-    res.clearCookie("authToken", {
-      path: "/",
-      domain: undefined, // Don't specify domain for localhost
-      secure: false, // Always false for development
-      sameSite: "lax",
-    });
-
-    res.cookie("authToken", token, setCookieOptions());
-
     res.status(201).json({
       message: "User created successfully",
       user: {
@@ -45,6 +35,7 @@ const register = async (req, res, next) => {
         email: user.email,
         plan: user.plan,
       },
+      token: token,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -72,15 +63,6 @@ const login = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
-    res.clearCookie("authToken", {
-      path: "/",
-      domain: undefined,
-      secure: false,
-      sameSite: "lax",
-    });
-
-    res.cookie("authToken", token, setCookieOptions());
-
     res.json({
       message: "Login successful",
       user: {
@@ -89,6 +71,7 @@ const login = async (req, res, next) => {
         email: user.email,
         plan: user.plan,
       },
+      token: token,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -97,15 +80,6 @@ const login = async (req, res, next) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie("authToken", {
-    path: "/",
-    domain: undefined,
-    secure: false,
-    sameSite: "lax",
-  });
-
-  res.clearCookie("authToken");
-
   res.json({ message: "Logout successful" });
 };
 

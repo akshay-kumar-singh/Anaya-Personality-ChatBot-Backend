@@ -20,27 +20,12 @@ const authenticate = async (req, res, next) => {
       decoded = verifyToken(token);
     } catch (tokenError) {
       console.log("Token verification failed:", tokenError.message);
-
-      res.clearCookie("authToken", {
-        path: "/",
-        domain: undefined,
-        secure: false,
-        sameSite: "lax",
-      });
-
       return res.status(401).json({ error: "Invalid or expired token." });
     }
 
     const user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {
-      res.clearCookie("authToken", {
-        path: "/",
-        domain: undefined,
-        secure: false,
-        sameSite: "lax",
-      });
-
       return res.status(401).json({ error: "User not found." });
     }
 
@@ -48,14 +33,6 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Authentication middleware error:", error);
-
-    res.clearCookie("authToken", {
-      path: "/",
-      domain: undefined,
-      secure: false,
-      sameSite: "lax",
-    });
-
     res.status(401).json({ error: "Authentication failed." });
   }
 };
